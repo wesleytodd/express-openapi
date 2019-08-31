@@ -1,31 +1,31 @@
 'use strict'
-// vim: set ts=2 sw=2 expandtab:
-var { describe, it } = require('mocha')
+var { suite, test } = require('mocha')
 var assert = require('assert')
 var util = require('util')
 var supertest = require('supertest')
 var express = require('express')
 var SwaggerParser = require('swagger-parser')
 var openapi = require('../')
+var { name } = require('../package.json')
 
 function logDocument (doc) {
   console.log(util.inspect(doc, { depth: null }))
 }
 
-describe('@express/openapi', function () {
-  it('should accept no options', function () {
+suite(name, function () {
+  test('accept no options', function () {
     const oapi = openapi()
     assert.strictEqual(oapi.routePrefix, openapi.defaultRoutePrefix)
     assert.deepStrictEqual(oapi.document, openapi.minimumViableDocument)
   })
 
-  it('should accept no document option', function () {
+  test('accept no document option', function () {
     const oapi = openapi('/test')
     assert.strictEqual(oapi.routePrefix, '/test')
     assert.deepStrictEqual(oapi.document, openapi.minimumViableDocument)
   })
 
-  it('should accept both a routePrefix and a document', function () {
+  test('accept both a routePrefix and a document', function () {
     const oapi = openapi('/test', {
       info: {
         title: 'Test App'
@@ -42,7 +42,7 @@ describe('@express/openapi', function () {
     })
   })
 
-  it('should create a basic valid OpenAPI document and serve it on an express app', function (done) {
+  test('create a basic valid OpenAPI document and serve test on an express app', function (done) {
     const app = express()
     app.use(openapi())
     supertest(app)
@@ -57,7 +57,7 @@ describe('@express/openapi', function () {
       })
   })
 
-  it('should load routes from the express app', function (done) {
+  test('load routes from the express app', function (done) {
     const app = express()
     const oapi = openapi()
 
@@ -97,7 +97,7 @@ describe('@express/openapi', function () {
       })
   })
 
-  it('should support express array formats', (done) => {
+  test('support express array formats', (done) => {
     const app = express()
     const oapi = openapi()
 
@@ -150,7 +150,7 @@ describe('@express/openapi', function () {
       })
   })
 
-  it('should support express route syntax', (done) => {
+  test('support express route syntax', (done) => {
     const app = express()
     const oapi = openapi()
 
@@ -204,7 +204,7 @@ describe('@express/openapi', function () {
       })
   })
 
-  it('should support named path params', (done) => {
+  test('support named path params', (done) => {
     const app = express()
     const oapi = openapi()
 
@@ -243,4 +243,8 @@ describe('@express/openapi', function () {
         })
       })
   })
+
+  // Other tests
+  require('./_validate')()
+  require('./_routes')()
 })
