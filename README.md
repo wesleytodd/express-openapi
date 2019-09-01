@@ -178,7 +178,7 @@ and `err.validationErrors` is the format exposed by that package.
 **Example:**
 
 ```javascript
-app.get('/:foo', oapi.path({
+app.get('/:foo', oapi.validPath({
   description: 'Get a foo',
   responses: {
     200: {
