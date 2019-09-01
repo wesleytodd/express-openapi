@@ -1,11 +1,24 @@
 # Express OpenAPI
 
+[![NPM Version](https://badgen.net/npm/v/@wesleytodd/openapi)](https://npmjs.org/package/@wesleytodd/openapi)
+[![NPM Downloads](https://badgen.net/npm/dm/@wesleytodd/openapi)](https://npmjs.org/package/@wesleytodd/openapi)
+[![js-standard-style](https://badgen.net/badge/style/standard/green)](https://github.com/standard/standard)
+
 A middleware for generating and validating OpenAPI documentation from an Express app.
 
 This middleware will look at the routes defined in your app and fill in as much as it can about them
 into an OpenAPI document.  Optionally you can also flesh out request and response schemas, parameters, and
 other parts of your api spec with path specific middleware.  The final document will be exposed as json
 served by the main middleware (along with component specific documents).
+
+## Note on package name
+
+This pacakge document's itself as `@express/openapi`. This is because we (the Express TC) have been discussng
+adopting the npm scope for publishing "core maintained" middleware modules.  This is one such middleware.
+While we are working out the details of this I am publishing this moudle under my personal scope.  When
+that is resolved we will move it over to the main scope and I will deprecate this module.
+
+Install & usage step for now: `$ npm in @wesleytodd/openapi` & `const openapi = require('@wesleytodd/openapi')`
 
 ## Philosophy
 
