@@ -1,20 +1,12 @@
 'use strict'
-// vim: set ts=2 sw=2 expandtab:
-const pathToRegexp = require('path-to-regexp')
-const serve = require('serve-static')
+const httpErrors = require('http-errors')
 const Router = require('router')
-const path = require('path')
-
-const schemaSymbol = Symbol('schemaMiddleware')
+const ui = require('./lib/ui')
+const makeValidator = require('./lib/validate')
+const { get: getSchema, set: setSchema } = require('./lib/layer-schema')
+const minimumViableDocument = require('./lib/minimum-doc')
+const generateDocument = require('./lib/generate-doc')
 const defaultRoutePrefix = '/openapi'
-const minimumViableDocument = {
-  openapi: '3.0.0',
-  info: {
-    title: 'Express App',
-    version: '1.0.0'
-  },
-  paths: {}
-}
 
 module.exports = function ExpressOpenApi (_routePrefix, _doc, opts = {}) {
   let routePrefix = _routePrefix || defaultRoutePrefix
@@ -28,19 +20,22 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, opts = {}) {
   // to use the express router in an express middleware
   const router = new Router()
 
+  // Fully generate the doc on the first request
+  let isFirstRequest = true
+
   // Where the magic happens
   const middleware = function OpenApiMiddleware (req, res, next) {
+    if (isFirstRequest) {
+      middleware.document = generateDocument(middleware.document, req.app._router || req.app.router)
+      isFirstRequest = false
+    }
+
     router.handle(req, res, next)
   }
 
   // Expose the current document and prefix
   middleware.routePrefix = routePrefix
-  middleware.document = Object.assign({
-    openapi: minimumViableDocument.openapi
-  }, doc, {
-    info: Object.assign({}, minimumViableDocument.info, doc.info),
-    paths: Object.assign({}, minimumViableDocument.paths, doc.paths)
-  })
+  middleware.document = generateDocument(doc)
   middleware.generateDocument = generateDocument
 
   // Add a path schema to the document
@@ -49,8 +44,22 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, opts = {}) {
       next()
     }
 
-    schemaMiddleware[schemaSymbol] = schema
+    setSchema(schemaMiddleware, schema)
     return schemaMiddleware
+  }
+
+  // Validate path middleware
+  middleware.validPath = function (schema = {}, options = {}) {
+    let validate
+    function validSchemaMiddleware (req, res, next) {
+      if (!validate) {
+        validate = makeValidator(options, getSchema(validSchemaMiddleware))
+      }
+      return validate(req, res, next)
+    }
+
+    setSchema(validSchemaMiddleware, schema)
+    return validSchemaMiddleware
   }
 
   // Component definitions
@@ -72,6 +81,13 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, opts = {}) {
       return { '$ref': `#/components/${type}/${name}` }
     }
 
+    // @TODO create id
+    if (!description || !description['$id']) {
+      // const server = middleware.document.servers && middleware.document.servers[0] && middleware.document.servers[0].url
+      // console.log(`${server || '/'}{routePrefix}/components/${type}/${name}.json`)
+      // description['$id'] = `${middleware.document.servers[0].url}/${routePrefix}/components/${type}/${name}.json`
+    }
+
     // Define a new component
     middleware.document.components = middleware.document.components || {}
     middleware.document.components[type] = middleware.document.components[type] || {}
@@ -90,13 +106,25 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, opts = {}) {
   middleware.callbacks = middleware.component.bind(null, 'callbacks')
 
   // Expose ui middleware
-  middleware.redoc = serveRedoc(`${routePrefix}.json`)
-  middleware.swaggerui = serveSwaggerUI(`${routePrefix}.json`)
+  middleware.redoc = ui.serveRedoc(`${routePrefix}.json`)
+  middleware.swaggerui = ui.serveSwaggerUI(`${routePrefix}.json`)
 
   // OpenAPI document as json
   router.get(`${routePrefix}.json`, (req, res) => {
     middleware.document = generateDocument(middleware.document, req.app._router || req.app.router)
     res.json(middleware.document)
+  })
+  router.get(`${routePrefix}/components/:type/:name.json`, (req, res, next) => {
+    const { type, name } = req.params
+    middleware.document = generateDocument(middleware.document, req.app._router || req.app.router)
+
+    // No component by that identifer
+    if (!middleware.document.components[type] || !middleware.document.components[type][name]) {
+      return next(httpErrors(404, `Component does not exist: ${type}/${name}`))
+    }
+
+    // Return component
+    res.json(middleware.document.components[type][name])
   })
 
   // Serve up the for exploring the document
@@ -120,118 +148,3 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, opts = {}) {
 
 module.exports.minimumViableDocument = minimumViableDocument
 module.exports.defaultRoutePrefix = defaultRoutePrefix
-
-function generateDocument (baseDocument, router) {
-  // Merge document with select minimum defaults
-  const doc = Object.assign({
-    openapi: minimumViableDocument.openapi
-  }, baseDocument, {
-    info: Object.assign({}, minimumViableDocument.info, baseDocument.info),
-    paths: Object.assign({}, minimumViableDocument.paths, baseDocument.paths)
-  })
-
-  // Iterate the middleware stack and add any paths and schemas, etc
-  router && router.stack.forEach((_layer) => {
-    iterateStack('', null, _layer, (path, routeLayer, layer) => {
-      const schema = layer.handle[schemaSymbol]
-      if (schema && layer.method) {
-        const operation = {}
-
-        // Add route params to schema
-        if (routeLayer && routeLayer.keys && routeLayer.keys.length) {
-          const keys = {}
-
-          operation.parameters = routeLayer.keys.map((k) => {
-            // Reformat the path
-            keys[k.name] = '{' + k.name + '}'
-
-            return {
-              name: k.name,
-              in: 'path',
-              required: !k.optional,
-              schema: { type: 'string' }
-            }
-          })
-          path = pathToRegexp.compile(path)(keys, { encode: (value) => value })
-        }
-
-        doc.paths[path] = doc.paths[path] || {}
-        doc.paths[path][layer.method] = Object.assign(operation, schema)
-      }
-    })
-  })
-
-  return doc
-}
-
-function iterateStack (path, routeLayer, layer, cb) {
-  cb(path, routeLayer, layer)
-  if (!layer.route) {
-    return
-  }
-  layer.route.stack.forEach((l) => iterateStack(path + layer.route.path, layer, l, cb))
-}
-
-function serveRedoc (documentUrl) {
-  return [serve(path.resolve(require.resolve('redoc'), '..')), function renderRedocHtml (req, res) {
-    res.type('html').send(renderHtmlPage(`
-      <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
-    `, `
-      <redoc spec-url="${documentUrl}"></redoc>
-      <script src="./redoc.standalone.js"></script>
-    `))
-  }]
-}
-
-function serveSwaggerUI (documentUrl) {
-  return [serve(path.resolve(require.resolve('swagger-ui-dist'), '..'), { index: false }), function renderSwaggerHtml (req, res) {
-    res.type('html').send(renderHtmlPage(`
-      <link rel="stylesheet" type="text/css" href="./swagger-ui.css" >
-    `, `
-      <div id="swagger-ui"></div>
-      <script src="./swagger-ui-bundle.js"></script>
-      <script src="./swagger-ui-standalone-preset.js"></script>
-      <script>
-        window.onload = function () {
-          window.ui = SwaggerUIBundle({
-            url: "${documentUrl}",
-            dom_id: '#swagger-ui'
-          })
-        }
-      </script>
-    `))
-  }]
-}
-
-function renderHtmlPage (head, body) {
-  return `<!DOCTYPE html>
-<html>
-  <head>
-    <title>ReDoc</title>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-      html {
-          box-sizing: border-box;
-          overflow: -moz-scrollbars-vertical;
-          overflow-y: scroll;
-      }
-      *,
-      *:before,
-      *:after {
-          box-sizing: inherit;
-      }
-      body {
-        margin: 0;
-        padding: 0;
-        background: #fafafa;
-      }
-    </style>
-    ${head}
-  </head>
-  <body>
-    ${body}
-  </body>
-</html> 
-  `
-}
