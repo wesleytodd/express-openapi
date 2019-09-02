@@ -30,6 +30,7 @@
   "dependencies": {
     "ajv": "^6.10.2",
     "http-errors": "^1.7.3",
+    "merge-deep": "^3.0.2",
     "path-to-regexp": "^2.4.0",
     "redoc": "^2.0.0-alpha.41",
     "router": "^1.3.3",
