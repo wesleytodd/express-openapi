@@ -53,7 +53,7 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, opts = {}) {
     let validate
     function validSchemaMiddleware (req, res, next) {
       if (!validate) {
-        validate = makeValidator(options, getSchema(validSchemaMiddleware))
+        validate = makeValidator(options, middleware, getSchema(validSchemaMiddleware))
       }
       return validate(req, res, next)
     }
