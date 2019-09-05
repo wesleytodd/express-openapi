@@ -1,12 +1,12 @@
 'use strict'
-var { suite, test } = require('mocha')
-var assert = require('assert')
-var util = require('util')
-var supertest = require('supertest')
-var express = require('express')
-var SwaggerParser = require('swagger-parser')
-var openapi = require('../')
-var { name } = require('../package.json')
+const { suite, test } = require('mocha')
+const assert = require('assert')
+const util = require('util')
+const supertest = require('supertest')
+const express = require('express')
+const SwaggerParser = require('swagger-parser')
+const openapi = require('../')
+const { name } = require('../package.json')
 
 function logDocument (doc) {
   console.log(util.inspect(doc, { depth: null }))

@@ -1,6 +1,7 @@
 'use strict'
 const httpErrors = require('http-errors')
 const Router = require('router')
+const SwaggerParser = require('swagger-parser')
 const ui = require('./lib/ui')
 const makeValidator = require('./lib/validate')
 const { get: getSchema, set: setSchema } = require('./lib/layer-schema')
@@ -82,11 +83,13 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, opts = {}) {
     }
 
     // @TODO create id
-    if (!description || !description['$id']) {
-      // const server = middleware.document.servers && middleware.document.servers[0] && middleware.document.servers[0].url
-      // console.log(`${server || '/'}{routePrefix}/components/${type}/${name}.json`)
-      // description['$id'] = `${middleware.document.servers[0].url}/${routePrefix}/components/${type}/${name}.json`
-    }
+    // Is this necessary?  The point of this was to provide canonical component ref urls
+    // But now I think that might not be necessary.
+    // if (!description || !description['$id']) {
+    //   const server = middleware.document.servers && middleware.document.servers[0] && middleware.document.servers[0].url
+    //   console.log(`${server || '/'}{routePrefix}/components/${type}/${name}.json`)
+    //   description['$id'] = `${middleware.document.servers[0].url}/${routePrefix}/components/${type}/${name}.json`
+    // }
 
     // Define a new component
     middleware.document.components = middleware.document.components || {}
@@ -125,6 +128,24 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, opts = {}) {
 
     // Return component
     res.json(middleware.document.components[type][name])
+  })
+
+  // Validate full open api document
+  router.get(`${routePrefix}/validate`, (req, res) => {
+    middleware.document = generateDocument(middleware.document, req.app._router || req.app.router)
+    SwaggerParser.validate(middleware.document, (err, api) => {
+      if (err) {
+        return res.json({
+          valid: false,
+          details: err.details,
+          document: middleware.document
+        })
+      }
+      res.json({
+        valid: true,
+        document: middleware.document
+      })
+    })
   })
 
   // Serve up the for exploring the document
