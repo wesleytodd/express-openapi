@@ -1,10 +1,10 @@
 'use strict'
-var { suite, test } = require('mocha')
-var assert = require('assert')
-var supertest = require('supertest')
-var express = require('express')
-var SwaggerParser = require('swagger-parser')
-var openapi = require('..')
+const { suite, test } = require('mocha')
+const assert = require('assert')
+const supertest = require('supertest')
+const express = require('express')
+const SwaggerParser = require('swagger-parser')
+const openapi = require('..')
 
 module.exports = function () {
   suite('routes', function () {
@@ -47,6 +47,33 @@ module.exports = function () {
         .expect(200, (err, res) => {
           assert(!err, err)
           assert.deepStrictEqual(res.body, schema)
+          done()
+        })
+    })
+
+    test('validate and return any errors', function (done) {
+      const app = express()
+
+      const oapi = openapi()
+      app.use(oapi)
+      app.get('/bad-document', oapi.path({
+        responses: {
+          200: {
+            content: {
+              'application/json': {
+                schema: { type: 'object' }
+              }
+            }
+          }
+        }
+      }))
+
+      supertest(app)
+        .get(`${openapi.defaultRoutePrefix}/validate`)
+        .expect(200, (err, res) => {
+          assert(!err, err)
+          assert.deepStrictEqual(res.body.details[0].inner[0].path, ['paths', '/bad-document', 'get', 'responses', '200'])
+          assert.strictEqual(res.body.details[0].inner[0].params[0], 'description')
           done()
         })
     })
