@@ -1,6 +1,6 @@
 {
   "name": "@wesleytodd/openapi",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Middleware for generating OpenAPI/Swagger documentation for your Express app",
   "author": "Wes Todd <wes@wesleytodd.com>",
   "keywords": [
