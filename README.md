@@ -15,7 +15,7 @@ served by the main middleware (along with component specific documents).
 
 This pacakge document's itself as `@express/openapi`. This is because we (the Express TC) have been discussng
 adopting the npm scope for publishing "core maintained" middleware modules.  This is one such middleware.
-While we are working out the details of this I am publishing this moudle under my personal scope.  When
+While we are working out the details of this I am publishing this module under my personal scope.  When
 that is resolved we will move it over to the main scope and I will deprecate this module.
 
 Install & usage step for now: `$ npm i @wesleytodd/openapi` & `const openapi = require('@wesleytodd/openapi')`
@@ -51,7 +51,7 @@ const oapi = openapi({
 })
 
 // This will serve the generated json document(s)
-// (as well as swatter-ui or redoc if configured)
+// (as well as swagger-ui or redoc if configured)
 app.use(oapi)
 
 // To add path specific schema you can use the .path middleware
