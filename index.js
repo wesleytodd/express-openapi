@@ -9,12 +9,14 @@ const minimumViableDocument = require('./lib/minimum-doc')
 const generateDocument = require('./lib/generate-doc')
 const defaultRoutePrefix = '/openapi'
 
-module.exports = function ExpressOpenApi (_routePrefix, _doc, opts = {}) {
+module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
   let routePrefix = _routePrefix || defaultRoutePrefix
   let doc = _doc || minimumViableDocument
-  if (typeof routePrefix !== 'string') {
-    doc = _routePrefix || doc
+  let opts = _opts || {}
+  if (typeof _routePrefix !== 'string') {
     routePrefix = defaultRoutePrefix
+    doc = _routePrefix || minimumViableDocument
+    opts = _doc || _opts || {}
   }
 
   // We need to route a bit, seems a safe addition
@@ -54,7 +56,7 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, opts = {}) {
     let validate
     function validSchemaMiddleware (req, res, next) {
       if (!validate) {
-        validate = makeValidator(middleware, getSchema(validSchemaMiddleware))
+        validate = makeValidator(middleware, getSchema(validSchemaMiddleware), opts)
       }
       return validate(req, res, next)
     }

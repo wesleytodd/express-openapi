@@ -129,7 +129,17 @@ Options:
 - `route <string>`: A route for which the documentation will be served at
 - `document <object>`: Base document on top of which the paths will be added
 - `options <object>`: Options object
+  - `options.coerce`: Enable data type [`coercion`](https://www.npmjs.com/package/ajv#coercing-data-types)
   - `options.htmlui`: Turn on serving `redoc` or `swagger-ui` html ui
+
+##### Coerce
+
+By default `coerceTypes` is set to `true` for AJV, but a copy of the `req` data
+is passed to prevent modifying the `req` in an unexpected way.  This is because
+the `coerceTypes` option in (AJV modifies the input)[https://github.com/epoberezkin/ajv/issues/549].
+If this is the behavior you want, you can pass `true` for this and a copy will not be made.
+This will result in params in the path or query with type `number` will be converted
+to numbers [based on the rules from AJV](https://github.com/epoberezkin/ajv/blob/master/COERCION.md).
 
 ### `OpenApiMiddleware.path([definition])`
 
