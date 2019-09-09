@@ -10,13 +10,22 @@ const generateDocument = require('./lib/generate-doc')
 const defaultRoutePrefix = '/openapi'
 
 module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
+  // Acceptable arguments:
+  //   oapi()
+  //   oapi('/path')
+  //   oapi('/path', doc)
+  //   oapi('/path', doc, opts)
+  //   oapi(doc)
+  //   oapi(doc, opts)
+  //
+  // The below logic is correct, but very hard to reason about
   let routePrefix = _routePrefix || defaultRoutePrefix
   let doc = _doc || minimumViableDocument
   let opts = _opts || {}
   if (typeof _routePrefix !== 'string') {
     routePrefix = defaultRoutePrefix
     doc = _routePrefix || minimumViableDocument
-    opts = _doc || _opts || {}
+    opts = _doc || {}
   }
 
   // We need to route a bit, seems a safe addition
@@ -40,6 +49,7 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
   middleware.routePrefix = routePrefix
   middleware.document = generateDocument(doc)
   middleware.generateDocument = generateDocument
+  middleware.options = opts
 
   // Add a path schema to the document
   middleware.path = function (schema = {}) {
