@@ -25,6 +25,18 @@ suite(name, function () {
     assert.deepStrictEqual(oapi.document, openapi.minimumViableDocument)
   })
 
+  test('accept doc w/o path or opts', function () {
+    const oapi = openapi({
+      info: {
+        version: '1.0.0',
+        title: '@express/openapi'
+      }
+    })
+    assert.strictEqual(oapi.routePrefix, '/openapi')
+    assert.deepStrictEqual(oapi.document.info.title, '@express/openapi')
+    assert.deepStrictEqual(oapi.options, {})
+  })
+
   test('accept both a routePrefix and a document', function () {
     const oapi = openapi('/test', {
       info: {

@@ -15,7 +15,7 @@ served by the main middleware (along with component specific documents).
 
 This pacakge document's itself as `@express/openapi`. This is because we (the Express TC) have been discussng
 adopting the npm scope for publishing "core maintained" middleware modules.  This is one such middleware.
-While we are working out the details of this I am publishing this moudle under my personal scope.  When
+While we are working out the details of this I am publishing this module under my personal scope.  When
 that is resolved we will move it over to the main scope and I will deprecate this module.
 
 Install & usage step for now: `$ npm i @wesleytodd/openapi` & `const openapi = require('@wesleytodd/openapi')`
@@ -51,7 +51,7 @@ const oapi = openapi({
 })
 
 // This will serve the generated json document(s)
-// (as well as swatter-ui or redoc if configured)
+// (as well as swagger-ui or redoc if configured)
 app.use(oapi)
 
 // To add path specific schema you can use the .path middleware
@@ -129,7 +129,17 @@ Options:
 - `route <string>`: A route for which the documentation will be served at
 - `document <object>`: Base document on top of which the paths will be added
 - `options <object>`: Options object
+  - `options.coerce`: Enable data type [`coercion`](https://www.npmjs.com/package/ajv#coercing-data-types)
   - `options.htmlui`: Turn on serving `redoc` or `swagger-ui` html ui
+
+##### Coerce
+
+By default `coerceTypes` is set to `true` for AJV, but a copy of the `req` data
+is passed to prevent modifying the `req` in an unexpected way.  This is because
+the `coerceTypes` option in (AJV modifies the input)[https://github.com/epoberezkin/ajv/issues/549].
+If this is the behavior you want, you can pass `true` for this and a copy will not be made.
+This will result in params in the path or query with type `number` will be converted
+to numbers [based on the rules from AJV](https://github.com/epoberezkin/ajv/blob/master/COERCION.md).
 
 ### `OpenApiMiddleware.path([definition])`
 

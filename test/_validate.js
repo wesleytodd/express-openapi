@@ -53,7 +53,8 @@ module.exports = function () {
         }
       }), (req, res) => {
         res.status(200).json({
-          goodbye: 'moon'
+          goodbye: 'moon',
+          num: req.query.num
         })
       }, (err, req, res, next) => {
         assert(err)
@@ -61,7 +62,7 @@ module.exports = function () {
       })
 
       const res1 = await supertest(app)
-        .post('/bar')
+        .post('/bar?num=123')
         .set('X-Custom-Header', 'value')
         .send({
           hello: 'world',
@@ -70,6 +71,7 @@ module.exports = function () {
 
       assert.strictEqual(res1.statusCode, 200)
       assert.strictEqual(res1.body.goodbye, 'moon')
+      assert.strictEqual(res1.body.num, '123')
 
       const res2 = await supertest(app)
         .post('/bar')
@@ -92,6 +94,38 @@ module.exports = function () {
       assert.strictEqual(res3.statusCode, 400)
       assert.strictEqual(res3.body.validationErrors[0].dataPath, '.headers')
       assert.strictEqual(res3.body.validationErrors[0].params.missingProperty, 'x-custom-header')
+    })
+
+    test('coerce types on req', async function () {
+      const app = express()
+      const oapi = openapi(null, {
+        coerce: true
+      })
+
+      app.use(oapi)
+      app.post('/', oapi.validPath({
+        parameters: [{
+          name: 'num',
+          in: 'query',
+          schema: { type: 'number' }
+        }]
+      }), (req, res) => {
+        res.status(200).json({
+          num: req.query.num,
+          numType: typeof req.query.num
+        })
+      }, (err, req, res, next) => {
+        assert(err)
+        res.status(err.statusCode).json(err)
+      })
+
+      const res1 = await supertest(app)
+        .post('/?num=123')
+        .send()
+
+      assert.strictEqual(res1.statusCode, 200)
+      assert.strictEqual(res1.body.num, 123)
+      assert.strictEqual(res1.body.numType, 'number')
     })
   })
 }
