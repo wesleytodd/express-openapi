@@ -103,6 +103,11 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
     //   description['$id'] = `${middleware.document.servers[0].url}/${routePrefix}/components/${type}/${name}.json`
     // }
 
+    // Set name on parameter if not passed
+    if (type === 'parameters') {
+      description.name = description.name || name
+    }
+
     // Define a new component
     middleware.document.components = middleware.document.components || {}
     middleware.document.components[type] = middleware.document.components[type] || {}

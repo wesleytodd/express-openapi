@@ -256,6 +256,45 @@ suite(name, function () {
       })
   })
 
+  test('support parameter components', (done) => {
+    const app = express()
+    const oapi = openapi()
+
+    oapi.parameters('id', {
+      in: 'path',
+      required: true,
+      description: 'The entity id',
+      schema: { type: 'string' }
+    })
+
+    app.use(oapi)
+    app.get('/:id', oapi.path({
+      description: 'Get thing by id',
+      parameters: [ oapi.parameters('id') ],
+      responses: {
+        204: {
+          description: 'Successful response',
+          content: {
+            'application/json': { }
+          }
+        }
+      }
+    }), (req, res) => {
+      res.status(204).send()
+    })
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}/validate`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        assert.strictEqual(res.body.valid, true)
+        assert.strictEqual(res.body.document.components.parameters.id.name, 'id')
+        assert.strictEqual(res.body.document.components.parameters.id.description, 'The entity id')
+        assert.strictEqual(res.status, 200)
+        done()
+      })
+  })
+
   // Other tests
   require('./_validate')()
   require('./_routes')()
