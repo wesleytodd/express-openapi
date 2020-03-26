@@ -109,7 +109,7 @@ suite(name, function () {
       })
   })
 
-  test('support express array formats', (done) => {
+  test('support express array formats', done => {
     const app = express()
     const oapi = openapi()
 
@@ -118,7 +118,7 @@ suite(name, function () {
         204: {
           description: 'Successful response',
           content: {
-            'application/json': { }
+            'application/json': {}
           }
         }
       }
@@ -128,12 +128,20 @@ suite(name, function () {
     app.get('/undocumented', (req, res) => {
       res.status(204).send()
     })
-    app.get('/array', [emptySchema, (req, res) => {
-      res.status(204).send()
-    }])
-    app.get('/array-of-arrays', [[emptySchema, (req, res) => {
-      res.status(204).send()
-    }]])
+    app.get('/array', [
+      emptySchema,
+      (req, res) => {
+        res.status(204).send()
+      }
+    ])
+    app.get('/array-of-arrays', [
+      [
+        emptySchema,
+        (req, res) => {
+          res.status(204).send()
+        }
+      ]
+    ])
 
     supertest(app)
       .get(`${openapi.defaultRoutePrefix}.json`)
@@ -148,12 +156,18 @@ suite(name, function () {
           assert(api.paths['/array'])
           assert(api.paths['/array'].get)
           assert(api.paths['/array'].get.responses[204])
-          assert.strictEqual(api.paths['/array'].get.responses[204].description, 'Successful response')
+          assert.strictEqual(
+            api.paths['/array'].get.responses[204].description,
+            'Successful response'
+          )
 
           assert(api.paths['/array-of-arrays'])
           assert(api.paths['/array-of-arrays'].get)
           assert(api.paths['/array-of-arrays'].get.responses[204])
-          assert.strictEqual(api.paths['/array-of-arrays'].get.responses[204].description, 'Successful response')
+          assert.strictEqual(
+            api.paths['/array-of-arrays'].get.responses[204].description,
+            'Successful response'
+          )
 
           assert(!api.paths['/undocumented'])
 
@@ -162,7 +176,7 @@ suite(name, function () {
       })
   })
 
-  test('support express route syntax', (done) => {
+  test('support express route syntax', done => {
     const app = express()
     const oapi = openapi()
 
@@ -171,14 +185,15 @@ suite(name, function () {
         204: {
           description: 'Successful response',
           content: {
-            'application/json': { }
+            'application/json': {}
           }
         }
       }
     })
 
     app.use(oapi)
-    app.route('/route')
+    app
+      .route('/route')
       .get(emptySchema, (req, res) => {
         res.status(204).send()
       })
@@ -186,7 +201,8 @@ suite(name, function () {
         res.status(204).send()
       })
 
-    app.route('/route-all')
+    app
+      .route('/route-all')
       .all(emptySchema)
       .all((req, res) => {
         res.status(204).send()
@@ -205,18 +221,24 @@ suite(name, function () {
           assert(api.paths['/route'])
           assert(api.paths['/route'].get)
           assert(api.paths['/route'].get.responses[204])
-          assert.strictEqual(api.paths['/route'].get.responses[204].description, 'Successful response')
+          assert.strictEqual(
+            api.paths['/route'].get.responses[204].description,
+            'Successful response'
+          )
 
           assert(api.paths['/route'].put)
           assert(api.paths['/route'].put.responses[204])
-          assert.strictEqual(api.paths['/route'].put.responses[204].description, 'Successful response')
+          assert.strictEqual(
+            api.paths['/route'].put.responses[204].description,
+            'Successful response'
+          )
 
           done()
         })
       })
   })
 
-  test('support named path params', (done) => {
+  test('support named path params', done => {
     const app = express()
     const oapi = openapi()
 
@@ -225,7 +247,7 @@ suite(name, function () {
         204: {
           description: 'Successful response',
           content: {
-            'application/json': { }
+            'application/json': {}
           }
         }
       }
@@ -256,7 +278,7 @@ suite(name, function () {
       })
   })
 
-  test('support parameter components', (done) => {
+  test('support parameter components', done => {
     const app = express()
     const oapi = openapi()
 
@@ -268,30 +290,87 @@ suite(name, function () {
     })
 
     app.use(oapi)
-    app.get('/:id', oapi.path({
-      description: 'Get thing by id',
-      parameters: [ oapi.parameters('id') ],
-      responses: {
-        204: {
-          description: 'Successful response',
-          content: {
-            'application/json': { }
+    app.get(
+      '/:id',
+      oapi.path({
+        description: 'Get thing by id',
+        parameters: [oapi.parameters('id')],
+        responses: {
+          204: {
+            description: 'Successful response',
+            content: {
+              'application/json': {}
+            }
           }
         }
+      }),
+      (req, res) => {
+        res.status(204).send()
       }
-    }), (req, res) => {
-      res.status(204).send()
-    })
+    )
 
     supertest(app)
       .get(`${openapi.defaultRoutePrefix}/validate`)
       .expect(200, (err, res) => {
         assert(!err, err)
         assert.strictEqual(res.body.valid, true)
-        assert.strictEqual(res.body.document.components.parameters.id.name, 'id')
-        assert.strictEqual(res.body.document.components.parameters.id.description, 'The entity id')
+        assert.strictEqual(
+          res.body.document.components.parameters.id.name,
+          'id'
+        )
+        assert.strictEqual(
+          res.body.document.components.parameters.id.description,
+          'The entity id'
+        )
         assert.strictEqual(res.status, 200)
         done()
+      })
+  })
+
+  test('support express sub-routes with Router', done => {
+    const app = express()
+    const oapi = openapi()
+    const router = express.Router()
+
+    const emptySchema = oapi.path({
+      responses: {
+        204: {
+          description: 'Successful response',
+          content: {
+            'application/json': {}
+          }
+        }
+      }
+    })
+
+    app.use(oapi)
+
+    router.get('/endpoint', emptySchema, (req, res) => {
+      res.status(204).send()
+    })
+
+    app.use('/sub-route', router)
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.json`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        SwaggerParser.validate(res.body, (err, api) => {
+          if (err) {
+            logDocument(api)
+            done(err)
+          }
+
+          assert(api.paths['/sub-route/endpoint'])
+          assert(api.paths['/sub-route/endpoint'].get)
+          assert(api.paths['/sub-route/endpoint'].get.responses[204])
+          assert.strictEqual(
+            api.paths['/sub-route/endpoint'].get.responses[204].description,
+            'Successful response'
+          )
+
+          done()
+        })
       })
   })
 
