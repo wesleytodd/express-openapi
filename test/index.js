@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 const { suite, test } = require('mocha')
 const assert = require('assert')
 const util = require('util')
