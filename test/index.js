@@ -69,6 +69,30 @@ suite(name, function () {
       })
   })
 
+  test('create a basic valid Swagger UI document and check the HTML title', function (done) {
+    const app = express()
+    app.use(openapi().swaggerui)
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.json`)
+      .end((err, res) => {
+        assert(!err, err)
+        assert(res.text.includes('<title>Swagger UI</title>'))
+        done()
+      })
+  })
+
+  test('create a basic valid ReDoc document and check the HTML title', function (done) {
+    const app = express()
+    app.use(openapi().redoc)
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.json`)
+      .end((err, res) => {
+        assert(!err, err)
+        assert(res.text.includes('<title>ReDoc</title>'))
+        done()
+      })
+  })
+
   test('load routes from the express app', function (done) {
     const app = express()
     const oapi = openapi()
