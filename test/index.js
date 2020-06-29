@@ -69,6 +69,30 @@ suite(name, function () {
       })
   })
 
+  test('create a basic valid Swagger UI document and check the HTML title', function (done) {
+    const app = express()
+    app.use(openapi().swaggerui)
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.json`)
+      .end((err, res) => {
+        assert(!err, err)
+        assert(res.text.includes('<title>Swagger UI</title>'))
+        done()
+      })
+  })
+
+  test('create a basic valid ReDoc document and check the HTML title', function (done) {
+    const app = express()
+    app.use(openapi().redoc)
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.json`)
+      .end((err, res) => {
+        assert(!err, err)
+        assert(res.text.includes('<title>ReDoc</title>'))
+        done()
+      })
+  })
+
   test('load routes from the express app', function (done) {
     const app = express()
     const oapi = openapi()
@@ -292,6 +316,102 @@ suite(name, function () {
         assert.strictEqual(res.body.document.components.parameters.id.description, 'The entity id')
         assert.strictEqual(res.status, 200)
         done()
+      })
+  })
+
+  test('support express sub-routes with Router', (done) => {
+    const app = express()
+    const router = express.Router()
+    const oapi = openapi()
+
+    const emptySchema = oapi.path({
+      responses: {
+        204: {
+          description: 'Successful response',
+          content: {
+            'application/json': {}
+          }
+        }
+      }
+    })
+
+    router.get('/endpoint', emptySchema, (req, res) => {
+      res.status(204).send()
+    })
+
+    app.use(oapi)
+    app.use('/sub-route', router)
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.json`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        SwaggerParser.validate(res.body, (err, api) => {
+          if (err) {
+            logDocument(api)
+
+            done(err)
+          }
+
+          assert(api.paths['/sub-route/endpoint'])
+          assert(api.paths['/sub-route/endpoint'].get)
+          assert(api.paths['/sub-route/endpoint'].get.responses[204])
+          assert.strictEqual(
+            api.paths['/sub-route/endpoint'].get.responses[204].description,
+            'Successful response'
+          )
+
+          done()
+        })
+      })
+  })
+
+  test('support express nested sub-routes with Router', (done) => {
+    const app = express()
+    const router = express.Router()
+    const subrouter = express.Router()
+    const oapi = openapi()
+
+    const emptySchema = oapi.path({
+      responses: {
+        204: {
+          description: 'Successful response',
+          content: {
+            'application/json': {}
+          }
+        }
+      }
+    })
+
+    subrouter.get('/endpoint', emptySchema, (req, res) => {
+      res.status(204).send()
+    })
+
+    app.use(oapi)
+    app.use('/sub-route', router)
+    router.use('/sub-sub-route', subrouter)
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.json`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        SwaggerParser.validate(res.body, (err, api) => {
+          if (err) {
+            logDocument(api)
+
+            done(err)
+          }
+
+          assert(api.paths['/sub-route/sub-sub-route/endpoint'])
+          assert(api.paths['/sub-route/sub-sub-route/endpoint'].get)
+          assert(api.paths['/sub-route/sub-sub-route/endpoint'].get.responses[204])
+          assert.strictEqual(
+            api.paths['/sub-route/sub-sub-route/endpoint'].get.responses[204].description,
+            'Successful response'
+          )
+
+          done()
+        })
       })
   })
 

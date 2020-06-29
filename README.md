@@ -13,7 +13,7 @@ served by the main middleware (along with component specific documents).
 
 ## Note on package name
 
-This pacakge document's itself as `@express/openapi`. This is because we (the Express TC) have been discussng
+This package documents itself as `@express/openapi`. This is because we (the Express TC) have been discussing
 adopting the npm scope for publishing "core maintained" middleware modules.  This is one such middleware.
 While we are working out the details of this I am publishing this module under my personal scope.  When
 that is resolved we will move it over to the main scope and I will deprecate this module.
@@ -24,7 +24,7 @@ Install & usage step for now: `$ npm i @wesleytodd/openapi` & `const openapi = r
 
 It is common in the OpenAPI community to talk about generating code from documentation. There is value
 in this approach, as often it is easier for devs to let someone else make the implementation decisions
-for them.  For me, I feel the opposite.  I am an engineer who's job it is to make good desicions about
+for them.  For me, I feel the opposite.  I am an engineer whose job it is to make good decisions about
 writing quality code. I want control of my application, and I want to write code. With this module I can
 both write great code, as well as have great documentation!
 
@@ -143,7 +143,7 @@ to numbers [based on the rules from AJV](https://github.com/epoberezkin/ajv/blob
 
 ### `OpenApiMiddleware.path([definition])`
 
-Registers a path with the OpenApi document.  The path `definition` is an
+Registers a path with the OpenAPI document.  The path `definition` is an
 [`OperationObject`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#operationObject)
 with all of the information about the requests and responses on that route. It returns
 a middleware function which can be used in an express app.
@@ -176,7 +176,7 @@ app.get('/:foo', oapi.path({
 
 ### `OpenApiMiddleware.validPath([definition])`
 
-Registers a path with the OpenApi document, also ensures incoming requests are valid against the schema.  The path
+Registers a path with the OpenAPI document, also ensures incoming requests are valid against the schema.  The path
 `definition` is an [`OperationObject`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#operationObject)
 with all of the information about the requests and responses on that route. It returns a middleware function which
 can be used in an express app and will call `next(err) if the incoming request is invalid.
@@ -270,22 +270,22 @@ oapi.component('examples')
 #### `OpenApiMiddleware.callbacks(name[, definition])`
 
 There are special component middleware for all of the types of component defined in the
-[OpenApi spec](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#fixed-fields-6).
+[OpenAPI spec](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#fixed-fields-6).
 Each of which is just the `component` method with a bound type, and behave with the same variadic behavior.
 
 ### `OpenApiMiddleware.redoc()`
 ### `OpenApiMiddleware.swaggerui()`
 
-Serve an interactive UI for exploring the OpenApi document.
+Serve an interactive UI for exploring the OpenAPI document.
 
 [Redoc](https://github.com/Rebilly/ReDoc/) and [SwaggerUI](https://www.npmjs.com/package/swagger-ui) are
-two of the most popular tools for viewing OpenApi documents and are bundled with the middleware.
+two of the most popular tools for viewing OpenAPI documents and are bundled with the middleware.
 They are not turned on by default but can be with the option mentioned above or by using one
 of these middleware.
 
 **Example:**
 
 ```javascript
-app.use('/redoc', oapi.redoc())
-app.use('/swaggerui', oapi.redoc())
+app.use('/redoc', oapi.redoc)
+app.use('/swaggerui', oapi.swaggerui)
 ```
