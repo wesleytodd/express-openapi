@@ -17,7 +17,7 @@
   },
   "scripts": {
     "test": "standard && mocha",
-    "prepublushOnly": "npm t",
+    "prepublishOnly": "npm t",
     "postpublish": "git push origin && git push origin --tags"
   },
   "devDependencies": {
