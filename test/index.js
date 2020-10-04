@@ -7,6 +7,7 @@ const express = require('express')
 const SwaggerParser = require('swagger-parser')
 const openapi = require('../')
 const { name } = require('../package.json')
+const YAML = require('yaml')
 
 function logDocument (doc) {
   console.log(util.inspect(doc, { depth: null }))
@@ -54,7 +55,7 @@ suite(name, function () {
     })
   })
 
-  test('create a basic valid OpenAPI document and serve test on an express app', function (done) {
+  test('create a basic valid OpenAPI document and serve test json on an express app', function (done) {
     const app = express()
     app.use(openapi())
     supertest(app)
@@ -62,6 +63,40 @@ suite(name, function () {
       .expect(200, (err, res) => {
         assert(!err, err)
         SwaggerParser.validate(res.body, (err, api) => {
+          assert(!err, err)
+          assert.deepStrictEqual(api, openapi.minimumViableDocument)
+          done()
+        })
+      })
+  })
+
+  test('create a basic valid OpenAPI document and serve test yaml on an express app', function (done) {
+    const app = express()
+    app.use(openapi())
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.yaml`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        const output = YAML.parse(res.text)
+        SwaggerParser.validate(output, (err, api) => {
+          assert(!err, err)
+          assert.deepStrictEqual(api, openapi.minimumViableDocument)
+          done()
+        })
+      })
+  })
+
+  test('create a basic valid OpenAPI document and serve test yml on an express app', function (done) {
+    const app = express()
+    app.use(openapi())
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.yml`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        const output = YAML.parse(res.text)
+        SwaggerParser.validate(output, (err, api) => {
           assert(!err, err)
           assert.deepStrictEqual(api, openapi.minimumViableDocument)
           done()
