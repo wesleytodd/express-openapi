@@ -314,6 +314,47 @@ suite(name, function () {
         assert.strictEqual(res.body.valid, true)
         assert.strictEqual(res.body.document.components.parameters.id.name, 'id')
         assert.strictEqual(res.body.document.components.parameters.id.description, 'The entity id')
+        assert.strictEqual(res.body.document.components.parameters.id.schema.type, 'string')
+        assert.strictEqual(res.status, 200)
+        done()
+      })
+  })
+
+  test('support a non-string path parameter', (done) => {
+    const app = express()
+    const oapi = openapi()
+
+    oapi.parameters('id', {
+      in: 'path',
+      required: true,
+      description: 'The numeric User ID',
+      schema: { type: 'integer' }
+    })
+
+    app.use(oapi)
+    app.get('/:id', oapi.path({
+      description: 'Get a user by ID',
+      parameters: [oapi.parameters('id')],
+      responses: {
+        204: {
+          description: 'Successful response',
+          content: {
+            'application/json': { }
+          }
+        }
+      }
+    }), (req, res) => {
+      res.status(204).send()
+    })
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}/validate`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        assert.strictEqual(res.body.valid, true)
+        assert.strictEqual(res.body.document.components.parameters.id.name, 'id')
+        assert.strictEqual(res.body.document.components.parameters.id.description, 'The numeric User ID')
+        assert.strictEqual(res.body.document.components.parameters.id.schema.type, 'integer')
         assert.strictEqual(res.status, 200)
         done()
       })
