@@ -318,7 +318,7 @@ suite(name, function () {
         done()
       })
   })
-  
+
   test('support a non-string path parameter', (done) => {
     const app = express()
     const oapi = openapi()
