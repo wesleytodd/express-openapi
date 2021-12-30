@@ -314,6 +314,7 @@ suite(name, function () {
         assert.strictEqual(res.body.valid, true)
         assert.strictEqual(res.body.document.components.parameters.id.name, 'id')
         assert.strictEqual(res.body.document.components.parameters.id.description, 'The entity id')
+        assert.strictEqual(res.body.document.components.parameters.id.schema.type, 'string')
         assert.strictEqual(res.status, 200)
         done()
       })
