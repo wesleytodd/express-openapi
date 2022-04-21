@@ -1,5 +1,5 @@
 {
-  "name": "@express/openapi",
+  "name": "unleash-express-openapi",
   "version": "0.0.0",
   "description": "Middleware for generating OpenAPI/Swagger documentation for your Express app",
   "author": "Wes Todd <wes@wesleytodd.com>",
