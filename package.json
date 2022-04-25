@@ -1,5 +1,5 @@
 {
-  "name": "unleash-express-openapi",
+  "name": "@unleash/express-openapi",
   "version": "0.0.0",
   "description": "Middleware for generating OpenAPI/Swagger documentation for your Express app",
   "author": "Wes Todd <wes@wesleytodd.com>",
@@ -13,7 +13,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "wesleytodd/express-openapi"
+    "url": "git+https://github.com/Unleash/express-openapi.git"
   },
   "scripts": {
     "test": "standard && mocha",
