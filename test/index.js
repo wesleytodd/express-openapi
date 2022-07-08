@@ -415,6 +415,55 @@ suite(name, function () {
       })
   })
 
+  test('support express nested sub-routes with parameters Router', (done) => {
+    const app = express()
+    const router = express.Router()
+    const subrouter = express.Router()
+    const oapi = openapi()
+
+    const emptySchema = oapi.path({
+      responses: {
+        204: {
+          description: 'Successful response',
+          content: {
+            'application/json': {}
+          }
+        }
+      }
+    })
+
+    subrouter.get('/endpoint', emptySchema, (req, res) => {
+      res.status(204).send()
+    })
+
+    app.use(oapi)
+    app.use('/sub-route/:test1', router)
+    router.use('/sub-sub-route/:test2/:test3', subrouter)
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.json`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        SwaggerParser.validate(res.body, (err, api) => {
+          if (err) {
+            logDocument(api)
+
+            done(err)
+          }
+
+          assert(api.paths['/sub-route/{test1}/sub-sub-route/{test2}/{test3}/endpoint'])
+          assert(api.paths['/sub-route/{test1}/sub-sub-route/{test2}/{test3}/endpoint'].get)
+          assert(api.paths['/sub-route/{test1}/sub-sub-route/{test2}/{test3}/endpoint'].get.responses[204])
+          assert.strictEqual(
+            api.paths['/sub-route/{test1}/sub-sub-route/{test2}/{test3}/endpoint'].get.responses[204].description,
+            'Successful response'
+          )
+
+          done()
+        })
+      })
+  })
+
   // Other tests
   require('./_validate')()
   require('./_routes')()
