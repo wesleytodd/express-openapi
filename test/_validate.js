@@ -1,9 +1,9 @@
 'use strict'
-var { suite, test } = require('mocha')
-var assert = require('assert')
-var supertest = require('supertest')
-var express = require('express')
-var openapi = require('..')
+const { suite, test } = require('mocha')
+const assert = require('assert')
+const supertest = require('supertest')
+const express = require('express')
+const openapi = require('..')
 
 module.exports = function () {
   suite('validate', function () {
