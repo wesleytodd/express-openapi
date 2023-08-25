@@ -1,9 +1,9 @@
 'use strict'
-var { suite, test } = require('mocha')
-var assert = require('assert')
-var supertest = require('supertest')
-var express = require('express')
-var openapi = require('..')
+const { suite, test } = require('mocha')
+const assert = require('assert')
+const supertest = require('supertest')
+const express = require('express')
+const openapi = require('..')
 
 module.exports = function () {
   suite('validate', function () {
@@ -82,7 +82,7 @@ module.exports = function () {
         })
 
       assert.strictEqual(res2.statusCode, 400)
-      assert.strictEqual(res2.body.validationErrors[0].dataPath, '.body.hello')
+      assert.strictEqual(res2.body.validationErrors[0].instancePath, '/body/hello')
 
       const res3 = await supertest(app)
         .post('/bar')
@@ -92,7 +92,7 @@ module.exports = function () {
         })
 
       assert.strictEqual(res3.statusCode, 400)
-      assert.strictEqual(res3.body.validationErrors[0].dataPath, '.headers')
+      assert.strictEqual(res3.body.validationErrors[0].instancePath, '/headers')
       assert.strictEqual(res3.body.validationErrors[0].params.missingProperty, 'x-custom-header')
     })
 

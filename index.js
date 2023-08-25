@@ -8,6 +8,7 @@ const { get: getSchema, set: setSchema } = require('./lib/layer-schema')
 const minimumViableDocument = require('./lib/minimum-doc')
 const generateDocument = require('./lib/generate-doc')
 const defaultRoutePrefix = '/openapi'
+const YAML = require('yaml')
 
 module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
   // Acceptable arguments:
@@ -91,7 +92,7 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
       if (!middleware.document.components || !middleware.document.components[type] || !middleware.document.components[type][name]) {
         throw new Error(`Unknown ${type} ref: ${name}`)
       }
-      return { '$ref': `#/components/${type}/${name}` }
+      return { $ref: `#/components/${type}/${name}` }
     }
 
     // @TODO create id
@@ -134,6 +135,16 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
     middleware.document = generateDocument(middleware.document, req.app._router || req.app.router)
     res.json(middleware.document)
   })
+
+  // OpenAPI document as yaml
+  router.get([`${routePrefix}.yaml`, `${routePrefix}.yml`], (req, res) => {
+    const jsonSpec = generateDocument(middleware.document, req.app._router || req.app.router)
+    const yamlSpec = YAML.stringify(jsonSpec)
+
+    res.type('yaml')
+    res.send(yamlSpec)
+  })
+
   router.get(`${routePrefix}/components/:type/:name.json`, (req, res, next) => {
     const { type, name } = req.params
     middleware.document = generateDocument(middleware.document, req.app._router || req.app.router)

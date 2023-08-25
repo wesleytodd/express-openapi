@@ -7,6 +7,7 @@ const express = require('express')
 const SwaggerParser = require('swagger-parser')
 const openapi = require('../')
 const { name } = require('../package.json')
+const YAML = require('yaml')
 
 function logDocument (doc) {
   console.log(util.inspect(doc, { depth: null }))
@@ -54,7 +55,7 @@ suite(name, function () {
     })
   })
 
-  test('create a basic valid OpenAPI document and serve test on an express app', function (done) {
+  test('create a basic valid OpenAPI document and serve test json on an express app', function (done) {
     const app = express()
     app.use(openapi())
     supertest(app)
@@ -62,6 +63,40 @@ suite(name, function () {
       .expect(200, (err, res) => {
         assert(!err, err)
         SwaggerParser.validate(res.body, (err, api) => {
+          assert(!err, err)
+          assert.deepStrictEqual(api, openapi.minimumViableDocument)
+          done()
+        })
+      })
+  })
+
+  test('create a basic valid OpenAPI document and serve test yaml on an express app', function (done) {
+    const app = express()
+    app.use(openapi())
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.yaml`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        const output = YAML.parse(res.text)
+        SwaggerParser.validate(output, (err, api) => {
+          assert(!err, err)
+          assert.deepStrictEqual(api, openapi.minimumViableDocument)
+          done()
+        })
+      })
+  })
+
+  test('create a basic valid OpenAPI document and serve test yml on an express app', function (done) {
+    const app = express()
+    app.use(openapi())
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.yml`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        const output = YAML.parse(res.text)
+        SwaggerParser.validate(output, (err, api) => {
           assert(!err, err)
           assert.deepStrictEqual(api, openapi.minimumViableDocument)
           done()
@@ -294,7 +329,7 @@ suite(name, function () {
     app.use(oapi)
     app.get('/:id', oapi.path({
       description: 'Get thing by id',
-      parameters: [ oapi.parameters('id') ],
+      parameters: [oapi.parameters('id')],
       responses: {
         204: {
           description: 'Successful response',
@@ -314,6 +349,47 @@ suite(name, function () {
         assert.strictEqual(res.body.valid, true)
         assert.strictEqual(res.body.document.components.parameters.id.name, 'id')
         assert.strictEqual(res.body.document.components.parameters.id.description, 'The entity id')
+        assert.strictEqual(res.body.document.components.parameters.id.schema.type, 'string')
+        assert.strictEqual(res.status, 200)
+        done()
+      })
+  })
+
+  test('support a non-string path parameter', (done) => {
+    const app = express()
+    const oapi = openapi()
+
+    oapi.parameters('id', {
+      in: 'path',
+      required: true,
+      description: 'The numeric User ID',
+      schema: { type: 'integer' }
+    })
+
+    app.use(oapi)
+    app.get('/:id', oapi.path({
+      description: 'Get a user by ID',
+      parameters: [oapi.parameters('id')],
+      responses: {
+        204: {
+          description: 'Successful response',
+          content: {
+            'application/json': { }
+          }
+        }
+      }
+    }), (req, res) => {
+      res.status(204).send()
+    })
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}/validate`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        assert.strictEqual(res.body.valid, true)
+        assert.strictEqual(res.body.document.components.parameters.id.name, 'id')
+        assert.strictEqual(res.body.document.components.parameters.id.description, 'The numeric User ID')
+        assert.strictEqual(res.body.document.components.parameters.id.schema.type, 'integer')
         assert.strictEqual(res.status, 200)
         done()
       })
