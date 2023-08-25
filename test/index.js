@@ -294,7 +294,7 @@ suite(name, function () {
     app.use(oapi)
     app.get('/:id', oapi.path({
       description: 'Get thing by id',
-      parameters: [ oapi.parameters('id') ],
+      parameters: [oapi.parameters('id')],
       responses: {
         204: {
           description: 'Successful response',

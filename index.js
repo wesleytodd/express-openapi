@@ -91,7 +91,7 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
       if (!middleware.document.components || !middleware.document.components[type] || !middleware.document.components[type][name]) {
         throw new Error(`Unknown ${type} ref: ${name}`)
       }
-      return { '$ref': `#/components/${type}/${name}` }
+      return { $ref: `#/components/${type}/${name}` }
     }
 
     // @TODO create id
