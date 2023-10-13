@@ -95,6 +95,18 @@ module.exports = function () {
       assert.strictEqual(res3.statusCode, 400)
       assert.strictEqual(res3.body.validationErrors[0].instancePath, '/headers')
       assert.strictEqual(res3.body.validationErrors[0].params.missingProperty, 'x-custom-header')
+
+      const res4 = await supertest(app)
+        .post('/bar?num=123')
+        .set('X-Custom-Header', 'value')
+        .send({
+          hello: 'world',
+          birthday: 'bad date',
+          foo: 'bar'
+        })
+
+      assert.strictEqual(res4.statusCode, 400)
+      assert.strictEqual(res4.body.validationErrors[0].instancePath, '/body/birthday')
     })
 
     test('coerce types on req', async function () {
