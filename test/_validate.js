@@ -30,7 +30,8 @@ module.exports = function () {
               schema: {
                 type: 'object',
                 properties: {
-                  hello: { type: 'string', enum: ['world'] }
+                  hello: { type: 'string', enum: ['world'] },
+                  birthday: { type: 'string', format: 'date' }
                 }
               }
             }
