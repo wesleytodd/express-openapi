@@ -39,7 +39,7 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
   // Where the magic happens
   const middleware = function OpenApiMiddleware (req, res, next) {
     if (isFirstRequest) {
-      middleware.document = generateDocument(middleware.document, req.app._router || req.app.router)
+      middleware.document = generateDocument(middleware.document, req.app._router || req.app.router, opts.basePath)
       isFirstRequest = false
     }
 
