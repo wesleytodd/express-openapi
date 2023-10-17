@@ -131,6 +131,7 @@ Options:
 - `options <object>`: Options object
   - `options.coerce`: Enable data type [`coercion`](https://www.npmjs.com/package/ajv#coercing-data-types)
   - `options.htmlui`: Turn on serving `redoc` or `swagger-ui` html ui
+  - `options.basePath`: When set, will strip the value of `basePath` from the start of every path.
 
 ##### Coerce
 
