@@ -527,13 +527,64 @@ suite(name, function () {
             done(err)
           }
 
-          assert(api.paths.length === 1)
+          assert(Object.keys(api.paths).length === 1)
 
           assert(api.paths['/sub-sub-route/endpoint'])
           assert(api.paths['/sub-sub-route/endpoint'].get)
           assert(api.paths['/sub-sub-route/endpoint'].get.responses[204])
           assert.strictEqual(
             api.paths['/sub-sub-route/endpoint'].get.responses[204].description,
+            'Successful response'
+          )
+
+          done()
+        })
+      })
+  })
+
+  test('sub-routes should only be stripped once', (done) => {
+    const app = express()
+    const router = express.Router()
+    const subrouter = express.Router()
+    const oapi = openapi(undefined, { basePath: '/sub-route' })
+
+    const emptySchema = oapi.path({
+      responses: {
+        204: {
+          description: 'Successful response',
+          content: {
+            'application/json': {}
+          }
+        }
+      }
+    })
+
+    subrouter.get('/endpoint', emptySchema, (req, res) => {
+      res.status(204).send()
+    })
+
+    app.use(oapi)
+    app.use('/sub-route', router)
+    router.use('/sub-route', subrouter)
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.json`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        SwaggerParser.validate(res.body, (err, api) => {
+          if (err) {
+            logDocument(api)
+
+            done(err)
+          }
+
+          assert(Object.keys(api.paths).length === 1)
+
+          assert(api.paths['/sub-route/endpoint'])
+          assert(api.paths['/sub-route/endpoint'].get)
+          assert(api.paths['/sub-route/endpoint'].get.responses[204])
+          assert.strictEqual(
+            api.paths['/sub-route/endpoint'].get.responses[204].description,
             'Successful response'
           )
 
