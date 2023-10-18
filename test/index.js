@@ -527,6 +527,8 @@ suite(name, function () {
             done(err)
           }
 
+          assert(api.paths.length === 1)
+
           assert(api.paths['/sub-sub-route/endpoint'])
           assert(api.paths['/sub-sub-route/endpoint'].get)
           assert(api.paths['/sub-sub-route/endpoint'].get.responses[204])
