@@ -127,8 +127,8 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
   middleware.callbacks = middleware.component.bind(null, 'callbacks')
 
   // Expose ui middleware
-  middleware.redoc = ui.serveRedoc(`${routePrefix}.json`)
-  middleware.swaggerui = ui.serveSwaggerUI(`${routePrefix}.json`)
+  middleware.redoc = ui.serveRedoc(`${routePrefix}.json`, opts)
+  middleware.swaggerui = ui.serveSwaggerUI(`${routePrefix}.json`, opts)
 
   // OpenAPI document as json
   router.get(`${routePrefix}.json`, (req, res) => {
