@@ -132,7 +132,9 @@ Options:
   - `options.coerce`: Enable data type [`coercion`](https://www.npmjs.com/package/ajv#coercing-data-types)
   - `options.htmlui`: Turn on serving `redoc` or `swagger-ui` html ui
   - `options.basePath`: When set, will strip the value of `basePath` from the start of every path.
-The options object can also accept configuration parameters for Swagger and Redoc. The full list of Swagger and Redoc configuration options can be found here: https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/ and here: https://redocly.com/docs/redoc/config/ respectively.
+  - `options.customScripts`: an array of strings where you can pass in custom scripts which modify the appearance and/or functionality of the Swagger UI.
+  - `options.plugins`: If you have a custom script, you need to pass the name of the script in here (as an array of strings).
+  - The options object can also accept configuration parameters for Swagger and Redoc. The full list of Swagger and Redoc configuration options can be found here: https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/ and here: https://redocly.com/docs/redoc/config/ respectively.
 
 ##### Coerce
 
