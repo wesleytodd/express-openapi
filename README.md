@@ -132,9 +132,6 @@ Options:
   - `options.coerce`: Enable data type [`coercion`](https://www.npmjs.com/package/ajv#coercing-data-types)
   - `options.htmlui`: Turn on serving `redoc` or `swagger-ui` html ui
   - `options.basePath`: When set, will strip the value of `basePath` from the start of every path.
-  - `options.customScripts`: an array of strings where you can pass in custom scripts which modify the appearance and/or functionality of the Swagger UI.
-  - `options.plugins`: If you have a custom script, you need to pass the name of the script in here (as an array of strings).
-  - The options object can also accept configuration parameters for Swagger and Redoc. The full list of Swagger and Redoc configuration options can be found here: https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/ and here: https://redocly.com/docs/redoc/config/ respectively.
 
 ##### Coerce
 
@@ -285,11 +282,11 @@ Serve an interactive UI for exploring the OpenAPI document.
 [Redoc](https://github.com/Rebilly/ReDoc/) and [SwaggerUI](https://www.npmjs.com/package/swagger-ui) are
 two of the most popular tools for viewing OpenAPI documents and are bundled with the middleware.
 They are not turned on by default but can be with the option mentioned above or by using one
-of these middleware.
+of these middleware. Both interactive UIs also accept an optional object as a function argument which accepts configuration parameters for Swagger and Redoc. The full list of Swagger and Redoc configuration options can be found here: https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/ and here: https://redocly.com/docs/redoc/config/ respectively.
 
 **Example:**
 
 ```javascript
-app.use('/redoc', oapi.redoc)
-app.use('/swaggerui', oapi.swaggerui)
+app.use('/redoc', oapi.redoc())
+app.use('/swaggerui', oapi.swaggerui())
 ```
