@@ -106,7 +106,7 @@ suite(name, function () {
 
   test('create a basic valid Swagger UI document and check the HTML title', function (done) {
     const app = express()
-    app.use(openapi().swaggerui)
+    app.use(openapi().swaggerui())
     supertest(app)
       .get(`${openapi.defaultRoutePrefix}.json`)
       .end((err, res) => {
@@ -118,7 +118,7 @@ suite(name, function () {
 
   test('serves onload function in swagger-ui-init.js file', function (done) {
     const app = express()
-    app.use(openapi().swaggerui)
+    app.use(openapi().swaggerui())
     supertest(app)
       .get(`${openapi.defaultRoutePrefix}/swagger-ui-init.js`)
       .end((err, res) => {
@@ -130,7 +130,7 @@ suite(name, function () {
 
   test('create a basic valid ReDoc document and check the HTML title', function (done) {
     const app = express()
-    app.use(openapi().redoc)
+    app.use(openapi().redoc())
     supertest(app)
       .get(`${openapi.defaultRoutePrefix}.json`)
       .end((err, res) => {
