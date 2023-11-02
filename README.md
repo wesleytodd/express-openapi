@@ -51,7 +51,7 @@ const oapi = openapi({
 })
 
 // This will serve the generated json document(s)
-// (as well as swagger-ui or redoc if configured)
+// (as well as the swagger-ui if configured)
 app.use(oapi)
 
 // To add path specific schema you can use the .path middleware
@@ -130,7 +130,7 @@ Options:
 - `document <object>`: Base document on top of which the paths will be added
 - `options <object>`: Options object
   - `options.coerce`: Enable data type [`coercion`](https://www.npmjs.com/package/ajv#coercing-data-types)
-  - `options.htmlui`: Turn on serving `redoc` or `swagger-ui` html ui
+  - `options.htmlui`: Turn on serving `swagger-ui` html ui
   - `options.basePath`: When set, will strip the value of `basePath` from the start of every path.
 
 ##### Coerce
@@ -274,19 +274,16 @@ There are special component middleware for all of the types of component defined
 [OpenAPI spec](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#fixed-fields-6).
 Each of which is just the `component` method with a bound type, and behave with the same variadic behavior.
 
-### `OpenApiMiddleware.redoc()`
 ### `OpenApiMiddleware.swaggerui()`
 
 Serve an interactive UI for exploring the OpenAPI document.
 
-[Redoc](https://github.com/Rebilly/ReDoc/) and [SwaggerUI](https://www.npmjs.com/package/swagger-ui) are
-two of the most popular tools for viewing OpenAPI documents and are bundled with the middleware.
-They are not turned on by default but can be with the option mentioned above or by using one
+[SwaggerUI](https://www.npmjs.com/package/swagger-ui) is one of the most popular tools for viewing OpenAPI documents and are bundled with the middleware.
+The UI is not turned on by default but can be with the option mentioned above or by using one
 of these middleware. Both interactive UIs also accept an optional object as a function argument which accepts configuration parameters for Swagger and Redoc. The full list of Swagger and Redoc configuration options can be found here: https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/ and here: https://redocly.com/docs/redoc/config/ respectively.
 
 **Example:**
 
 ```javascript
-app.use('/redoc', oapi.redoc())
 app.use('/swaggerui', oapi.swaggerui())
 ```
