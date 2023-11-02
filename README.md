@@ -11,15 +11,6 @@ into an OpenAPI document.  Optionally you can also flesh out request and respons
 other parts of your api spec with path specific middleware.  The final document will be exposed as json
 served by the main middleware (along with component specific documents).
 
-## Note on package name
-
-This package documents itself as `@express/openapi`. This is because we (the Express TC) have been discussing
-adopting the npm scope for publishing "core maintained" middleware modules.  This is one such middleware.
-While we are working out the details of this I am publishing this module under my personal scope.  When
-that is resolved we will move it over to the main scope and I will deprecate this module.
-
-Install & usage step for now: `$ npm i @wesleytodd/openapi` & `const openapi = require('@wesleytodd/openapi')`
-
 ## Philosophy
 
 It is common in the OpenAPI community to talk about generating code from documentation. There is value
@@ -32,13 +23,13 @@ both write great code, as well as have great documentation!
 ## Installation
 
 ```
-$ npm install --save @express/openapi
+$ npm install --save @wesleytodd/openapi
 ```
 
 ## Usage
 
 ```javascript
-const openapi = require('@express/openapi')
+const openapi = require('@wesleytodd/openapi')
 const app = require('express')()
 
 const oapi = openapi({
