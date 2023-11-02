@@ -127,7 +127,6 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
   middleware.callbacks = middleware.component.bind(null, 'callbacks')
 
   // Expose ui middleware
-  middleware.redoc = ui.serveRedoc(`${routePrefix}.json`, opts)
   middleware.swaggerui = ui.serveSwaggerUI(`${routePrefix}.json`, opts)
 
   // OpenAPI document as json
@@ -180,11 +179,7 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
   if (opts.htmlui) {
     let ui = opts.htmlui
     if (!Array.isArray(opts.htmlui)) {
-      ui = [opts.htmlui || 'redoc']
-    }
-    if (ui.includes('redoc')) {
-      router.get(`${routePrefix}`, (req, res) => { res.redirect(`${routePrefix}/redoc`) })
-      router.use(`${routePrefix}/redoc`, middleware.redoc)
+      ui = [opts.htmlui]
     }
     if (ui.includes('swagger-ui')) {
       router.get(`${routePrefix}`, (req, res) => { res.redirect(`${routePrefix}/swagger-ui`) })
