@@ -5,6 +5,7 @@ const supertest = require('supertest')
 const express = require('express')
 const SwaggerParser = require('swagger-parser')
 const openapi = require('..')
+const _moreRoutes = require('./_moreRoutes')
 
 module.exports = function () {
   suite('routes', function () {
@@ -74,6 +75,22 @@ module.exports = function () {
           assert(!err, err)
           assert.deepStrictEqual(res.body.details[0].inner[0].path, ['paths', '/bad-document', 'get', 'responses', '200'])
           assert.strictEqual(res.body.details[0].inner[0].params[0], 'description')
+          done()
+        })
+    })
+
+    test('serve routes in a different file', function (done) {
+      const app = express()
+
+      const oapi = openapi()
+      app.use(oapi)
+      app.use('/:id', _moreRoutes)
+
+      supertest(app)
+        .get(`${openapi.defaultRoutePrefix}.json`)
+        .expect(200, (err, res) => {
+          assert(!err, err)
+          assert.strictEqual(Object.keys((res.body.paths))[0], '/{id}/')
           done()
         })
     })
