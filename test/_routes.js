@@ -94,5 +94,36 @@ module.exports = function () {
           done()
         })
     })
+
+    test('serve routes in an array as different routes', function (done) {
+      const app = express()
+
+      const oapi = openapi()
+      app.use(oapi)
+      app.get(['/route/:a', '/route/b', '/routeC'], oapi.path({
+        summary: 'Test route.',
+        responses: {
+          200: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'string'
+                }
+              }
+            }
+          }
+        }
+      }))
+
+      supertest(app)
+        .get(`${openapi.defaultRoutePrefix}.json`)
+        .expect(200, (err, res) => {
+          assert(!err, err)
+          assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{a}')
+          assert.strictEqual(Object.keys((res.body.paths))[1], '/route/b')
+          assert.strictEqual(Object.keys((res.body.paths))[2], '/routeC')
+          done()
+        })
+    })
   })
 }
