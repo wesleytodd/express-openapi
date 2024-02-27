@@ -3,11 +3,20 @@ const { suite, test } = require('mocha')
 const assert = require('assert')
 const util = require('util')
 const supertest = require('supertest')
-const express = require('express')
 const SwaggerParser = require('swagger-parser')
 const openapi = require('../')
 const { name } = require('../package.json')
 const YAML = require('yaml')
+
+// We support testing with different major versions of express
+let spec = 'express'
+if (process.env.EXPRESS_MAJOR) {
+  if (!['4', '5'].includes(process.env.EXPRESS_MAJOR)) {
+    throw new Error('EXPRESS_MAJOR contained an invalid value')
+  }
+  spec += process.env.EXPRESS_MAJOR
+}
+const express = require(spec)
 
 function logDocument (doc) {
   console.log(util.inspect(doc, { depth: null }))

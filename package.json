@@ -17,11 +17,13 @@
   },
   "scripts": {
     "test": "standard && mocha",
-    "prepublishOnly": "npm t",
+    "prepublishOnly": "EXPRESS_MAJOR=4 mocha && EXPRESS_MAJOR=5 mocha",
     "postpublish": "git push origin && git push origin --tags"
   },
   "devDependencies": {
     "express": "^4.18.2",
+    "express4": "github:expressjs/express#4.18.3-staging",
+    "express5": "npm:express@^5.0.0-beta.1",
     "mocha": "^10.2.0",
     "standard": "^17.1.0",
     "supertest": "^6.3.3"
