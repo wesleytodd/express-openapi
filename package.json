@@ -24,20 +24,20 @@
     "express": "^4.18.2",
     "express4": "github:expressjs/express#4.18.3-staging",
     "express5": "npm:express@^5.0.0-beta.1",
-    "mocha": "^10.2.0",
+    "mocha": "^10.3.0",
     "standard": "^17.1.0",
-    "supertest": "^6.3.3"
+    "supertest": "^6.3.4"
   },
   "dependencies": {
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "http-errors": "^2.0.0",
-    "merge-deep": "^3.0.2",
+    "merge-deep": "^3.0.3",
     "path-to-regexp": "^6.2.1",
-    "router": "^1.3.3",
-    "serve-static": "^1.13.2",
+    "router": "^1.3.8",
+    "serve-static": "^1.15.0",
     "swagger-parser": "^10.0.3",
-    "swagger-ui-dist": "^5.4.2",
-    "yaml": "^2.3.1"
+    "swagger-ui-dist": "^5.11.8",
+    "yaml": "^2.4.0"
   }
 }
