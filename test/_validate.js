@@ -107,6 +107,114 @@ module.exports = function () {
 
       assert.strictEqual(res4.statusCode, 400)
       assert.strictEqual(res4.body.validationErrors[0].instancePath, '/body/birthday')
+
+      app.put('/zoom', oapi.validPath({
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string', not: { regexp: '/^[A-Z]/' } }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          200: {
+            description: 'Successful response',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    goodbye: { type: 'string', enum: ['moon'] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }, { keywords: ['regexp'] }), (req, res) => {
+        res.status(200).json({
+          goodbye: 'moon',
+          num: req.query.num
+        })
+      }, (err, req, res, next) => {
+        assert(err)
+        res.status(err.statusCode).json(err)
+      })
+
+      const res5 = await supertest(app)
+        .put('/zoom')
+        .send({
+          hello: 'world',
+          foo: 'bar',
+          name: 'abc'
+        })
+
+      assert.strictEqual(res5.statusCode, 200)
+
+      const res6 = await supertest(app)
+        .put('/zoom')
+        .send({
+          hello: 'world',
+          foo: 'bar',
+          name: 'Abc'
+        })
+
+      assert.strictEqual(res6.statusCode, 400)
+      assert.strictEqual(res6.body.validationErrors[0].instancePath, '/body/name')
+
+      app.get('/me', oapi.validPath({
+        parameters: [{
+          name: 'q',
+          in: 'query',
+          schema: {
+            type: 'string',
+            regexp: {
+              pattern: '^o',
+              flags: 'i'
+            }
+          }
+        }],
+        responses: {
+          200: {
+            description: 'Successful response',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    goodbye: { type: 'string', enum: ['moon'] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }, { keywords: ['regexp'] }), (req, res) => {
+        res.status(200).json({
+          goodbye: 'moon'
+        })
+      }, (err, req, res, next) => {
+        assert(err)
+        res.status(err.statusCode).json(err)
+      })
+
+      const res7 = await supertest(app)
+        .get('/me?q=123')
+
+      assert.strictEqual(res7.statusCode, 400)
+      assert.strictEqual(res7.body.validationErrors[0].instancePath, '/query/q')
+
+      const res8 = await supertest(app)
+        .get('/me?q=oops')
+
+      assert.strictEqual(res8.statusCode, 200)
+      assert.strictEqual(res8.body.goodbye, 'moon')
     })
 
     test('coerce types on req', async function () {
