@@ -166,7 +166,7 @@ app.get('/:foo', oapi.path({
 })
 ```
 
-### `OpenApiMiddleware.validPath([definition])`
+### `OpenApiMiddleware.validPath([definition [, pathOpts]])`
 
 Registers a path with the OpenAPI document, also ensures incoming requests are valid against the schema.  The path
 `definition` is an [`OperationObject`](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#operationObject)
@@ -175,7 +175,7 @@ can be used in an express app and will call `next(err) if the incoming request i
 
 The error is created with (`http-errors`)[https://www.npmjs.com/package/http-errors], and then is augmented with
 information about the schema and validation errors.  Validation uses (`avj`)[https://www.npmjs.com/package/ajv],
-and `err.validationErrors` is the format exposed by that package.
+and `err.validationErrors` is the format exposed by that package. Pass { keywords: [] } as pathOpts to support custom validation based on [ajv-keywords](https://www.npmjs.com/package/ajv-keywords).
 
 **Example:**
 
@@ -209,6 +209,30 @@ app.get('/:foo', oapi.validPath({
     }
   }
 }), (err, req, res, next) => {
+  res.status(err.status).json({
+    error: err.message,
+    validation: err.validationErrors,
+    schema: err.validationSchema
+  })
+})
+
+app.get('/zoom', oapi.validPath({
+  ...
+  requestBody: {
+    required: true,
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', not: { regexp: '/^[A-Z]/' } }
+          }
+        }
+      }
+    }
+  },
+  ...
+}, { keywords: ['regexp'] }), (err, req, res, next) => {
   res.status(err.status).json({
     error: err.message,
     validation: err.validationErrors,
