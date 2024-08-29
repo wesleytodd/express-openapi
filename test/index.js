@@ -655,5 +655,6 @@ suite(name, function () {
 
   // Other tests
   require('./_validate')()
+  require('./_regexRoutes')()
   require('./_routes')()
 })
