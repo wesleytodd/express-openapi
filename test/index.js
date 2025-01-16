@@ -653,6 +653,26 @@ suite(name, function () {
       })
   })
 
+  test('use a CDN', (done) => {
+    const app = express()
+    const oapi = openapi(undefined, { basePath: '/base-path' })
+
+    app.use(oapi)
+
+    app.get(oapi.routePrefix, oapi.swaggerui({ cdnBaseUrl: 'https://notARealURL' }))
+
+    supertest(app)
+      .get(oapi.routePrefix)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        assert(res.text.includes('<link rel="stylesheet" type="text/css" href="https://notARealURL/swagger-ui.css" >'))
+        assert(res.text.includes('<script src="https://notARealURL/swagger-ui-bundle.js"></script>'))
+        assert(res.text.includes('<script src="https://notARealURL/swagger-ui-standalone-preset.js"></script>'))
+        assert(res.text.includes('<script src="https://notARealURL/swagger-ui-init.js"></script>'))
+        done()
+      })
+  })
+
   // Other tests
   require('./_validate')()
   require('./_regexRoutes')()
