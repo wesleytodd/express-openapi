@@ -60,7 +60,8 @@ suite(name, function () {
         title: 'Test App',
         version: '1.0.0'
       },
-      paths: {}
+      paths: {},
+      tags: []
     })
   })
 
@@ -647,6 +648,189 @@ suite(name, function () {
             api.paths['/route/base-path/endpoint'].get.responses[204].description,
             'Successful response'
           )
+
+          done()
+        })
+      })
+  })
+
+  test('support tags', (done) => {
+    const app = express()
+    const oapi = openapi()
+
+    const firstTag = oapi.path({
+      tags: [
+        'first-tag'
+      ],
+      responses: {
+        204: {
+          description: 'Successful response',
+          content: {
+            'application/json': {}
+          }
+        }
+      }
+    })
+
+    app.get('/endpoint', firstTag, (req, res) => {
+      res.status(204).send()
+    })
+
+    const secondTag = oapi.path({
+      tags: [
+        'second-tag',
+        'third-tag'
+      ],
+      responses: {
+        204: {
+          description: 'Successful response',
+          content: {
+            'application/json': {}
+          }
+        }
+      }
+    })
+
+    app.get('/another-endpoint', secondTag, (req, res) => {
+      res.status(204).send()
+    })
+
+    app.use(oapi)
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.json`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        SwaggerParser.validate(res.body, (err, api) => {
+          if (err) {
+            logDocument(api)
+
+            done(err)
+          }
+
+          assert(Object.keys(api.paths).length === 2)
+
+          assert.deepStrictEqual(api.tags, [{
+            name: 'first-tag'
+          }, {
+            name: 'second-tag'
+          }, {
+            name: 'third-tag'
+          }])
+
+          done()
+        })
+      })
+  })
+
+  test('support tags with base document', (done) => {
+    const app = express()
+    const oapi = openapi({
+      tags: [
+        {
+          name: 'first-tag'
+        }
+      ]
+    })
+
+    const secondTag = oapi.path({
+      tags: [
+        'second-tag',
+        'third-tag'
+      ],
+      responses: {
+        204: {
+          description: 'Successful response',
+          content: {
+            'application/json': {}
+          }
+        }
+      }
+    })
+
+    app.get('/another-endpoint', secondTag, (req, res) => {
+      res.status(204).send()
+    })
+
+    app.use(oapi)
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.json`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        SwaggerParser.validate(res.body, (err, api) => {
+          if (err) {
+            logDocument(api)
+
+            done(err)
+          }
+
+          assert(Object.keys(api.paths).length === 1)
+
+          assert.deepStrictEqual(api.tags, [{
+            name: 'first-tag'
+          }, {
+            name: 'second-tag'
+          }, {
+            name: 'third-tag'
+          }])
+
+          done()
+        })
+      })
+  })
+
+  test('prefer global tags over method tags', (done) => {
+    const app = express()
+    const oapi = openapi({
+      tags: [
+        {
+          name: 'first-tag',
+          description: 'Description of first tag'
+        }
+      ]
+    })
+
+    const firstTag = oapi.path({
+      tags: [
+        'first-tag',
+        'second-tag'
+      ],
+      responses: {
+        204: {
+          description: 'Successful response',
+          content: {
+            'application/json': {}
+          }
+        }
+      }
+    })
+
+    app.get('/endpoint', firstTag, (req, res) => {
+      res.status(204).send()
+    })
+
+    app.use(oapi)
+
+    supertest(app)
+      .get(`${openapi.defaultRoutePrefix}.json`)
+      .expect(200, (err, res) => {
+        assert(!err, err)
+        SwaggerParser.validate(res.body, (err, api) => {
+          if (err) {
+            logDocument(api)
+
+            done(err)
+          }
+
+          assert(Object.keys(api.paths).length === 1)
+
+          assert.deepStrictEqual(api.tags, [{
+            name: 'first-tag',
+            description: 'Description of first tag'
+          }, {
+            name: 'second-tag'
+          }])
 
           done()
         })
