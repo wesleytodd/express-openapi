@@ -90,7 +90,7 @@ module.exports = function () {
         .get(`${openapi.defaultRoutePrefix}.json`)
         .expect(200, (err, res) => {
           assert(!err, err)
-          assert.strictEqual(Object.keys((res.body.paths))[0], '/{id}/')
+          assert.strictEqual(Object.keys((res.body.paths))[0], '(?:/([^/]+?))/')
           done()
         })
     })
