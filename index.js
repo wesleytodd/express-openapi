@@ -39,10 +39,13 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
   // Where the magic happens
   const middleware = function OpenApiMiddleware (req, res, next) {
     if (isFirstRequest) {
-      middleware.document = generateDocument(middleware.document, req.app._router || req.app.router, opts.basePath)
+      // Handle both Express 4 and 5 router access patterns
+      const appRouter = req.app._expressRouter || req.app._router || req.app.router
+      middleware.document = generateDocument(middleware.document, appRouter, opts.basePath)
       isFirstRequest = false
     }
 
+    // Use the new Router v2 handle method
     router.handle(req, res, next)
   }
 
@@ -131,13 +134,13 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
 
   // OpenAPI document as json
   router.get(`${routePrefix}.json`, (req, res) => {
-    middleware.document = generateDocument(middleware.document, req.app._router || req.app.router, opts.basePath)
+    middleware.document = generateDocument(middleware.document, req.app._expressRouter || req.app._router || req.app.router, opts.basePath)
     res.json(middleware.document)
   })
 
   // OpenAPI document as yaml
   router.get([`${routePrefix}.yaml`, `${routePrefix}.yml`], (req, res) => {
-    const jsonSpec = generateDocument(middleware.document, req.app._router || req.app.router, opts.basePath)
+    const jsonSpec = generateDocument(middleware.document, req.app._expressRouter || req.app._router || req.app.router, opts.basePath)
     const yamlSpec = YAML.stringify(jsonSpec)
 
     res.type('yaml')
@@ -146,7 +149,7 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
 
   router.get(`${routePrefix}/components/:type/:name.json`, (req, res, next) => {
     const { type, name } = req.params
-    middleware.document = generateDocument(middleware.document, req.app._router || req.app.router, opts.basePath)
+    middleware.document = generateDocument(middleware.document, req.app._expressRouter || req.app._router || req.app.router, opts.basePath)
 
     // No component by that identifer
     if (!middleware.document.components[type] || !middleware.document.components[type][name]) {
@@ -159,7 +162,7 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
 
   // Validate full open api document
   router.get(`${routePrefix}/validate`, (req, res) => {
-    middleware.document = generateDocument(middleware.document, req.app._router || req.app.router, opts.basePath)
+    middleware.document = generateDocument(middleware.document, req.app._expressRouter || req.app._router || req.app.router, opts.basePath)
     SwaggerParser.validate(middleware.document, (err, api) => {
       if (err) {
         return res.json({
