@@ -1,17 +1,17 @@
-const router = require('express').Router({ mergeParams: true })
+const router = require('express4').Router()
 const openapi = require('..')
 
 const oapi = openapi()
 router.use(oapi)
 
 router.get(
-  '/',
+  '/:id',
   oapi.validPath({
     summary: 'Get a user.',
     parameters: [
       {
         in: 'path',
-        imageId: 'id',
+        name: 'id',
         schema: {
           type: 'integer'
         }
