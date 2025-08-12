@@ -183,7 +183,7 @@ module.exports = function ExpressOpenApi (_routePrefix, _doc, _opts) {
     }
     if (ui.includes('swagger-ui')) {
       router.get(`${routePrefix}`, (req, res) => { res.redirect(`${routePrefix}/swagger-ui`) })
-      router.use(`${routePrefix}/swagger-ui`, middleware.swaggerui)
+      router.use(`${routePrefix}/swagger-ui`, middleware.swaggerui())
     }
   }
 
