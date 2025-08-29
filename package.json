@@ -17,7 +17,7 @@
   },
   "scripts": {
     "test": "standard && mocha",
-    "prepublishOnly": "EXPRESS_MAJOR=5 mocha",
+    "prepublishOnly": "mocha",
     "postpublish": "git push origin && git push origin --tags"
   },
   "devDependencies": {
