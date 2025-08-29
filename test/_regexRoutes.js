@@ -12,39 +12,7 @@ module.exports = function () {
 
       const oapi = openapi()
       app.use(oapi)
-      app.get('/route/:param*', oapi.path({
-        summary: 'Test route.',
-        responses: {
-          200: {
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'string'
-                }
-              }
-            }
-          }
-        }
-      }))
-
-      supertest(app)
-        .get(`${openapi.defaultRoutePrefix}.json`)
-        .expect(200, (err, res) => {
-          assert(!err, err)
-          assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{param}')
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters.length, 2)
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[0].in, 'path')
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[0].name, 'param')
-          done()
-        })
-    })
-
-    test('serve routes with a * wildcard in parentheses', function (done) {
-      const app = express()
-
-      const oapi = openapi()
-      app.use(oapi)
-      app.get('/route/:param(*)', oapi.path({
+      app.get('/route/*param', oapi.path({
         summary: 'Test route.',
         responses: {
           200: {
@@ -76,7 +44,7 @@ module.exports = function () {
 
       const oapi = openapi()
       app.use(oapi)
-      app.get(['/route/:param*', '/route/b', '/routeC'], oapi.path({
+      app.get(['/route/*param', '/route/b', '/routeC'], oapi.path({
         summary: 'Test route.',
         responses: {
           200: {
@@ -110,7 +78,7 @@ module.exports = function () {
 
       const oapi = openapi()
       app.use(oapi)
-      app.get('/route/:param/desc/*', oapi.path({
+      app.get('/route/:param/desc/*reg', oapi.path({
         summary: 'Test route.',
         responses: {
           200: {
@@ -129,10 +97,10 @@ module.exports = function () {
         .get(`${openapi.defaultRoutePrefix}.json`)
         .expect(200, (err, res) => {
           assert(!err, err)
-          assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{param}/desc/{0}')
+          assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{param}/desc/{reg}')
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters.length, 2)
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[0].name, 'param')
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[1].name, 0)
+          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[1].name, 'reg')
           done()
         })
     })
@@ -142,7 +110,7 @@ module.exports = function () {
 
       const oapi = openapi()
       app.use(oapi)
-      app.get('/*', oapi.path({
+      app.get('/*reg', oapi.path({
         summary: 'Test route.',
         responses: {
           200: {
@@ -161,9 +129,9 @@ module.exports = function () {
         .get(`${openapi.defaultRoutePrefix}.json`)
         .expect(200, (err, res) => {
           assert(!err, err)
-          assert.strictEqual(Object.keys((res.body.paths))[0], '/{0}')
+          assert.strictEqual(Object.keys((res.body.paths))[0], '/{reg}')
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters.length, 1)
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[0].name, 0)
+          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[0].name, 'reg')
           done()
         })
     })
@@ -173,7 +141,7 @@ module.exports = function () {
 
       const oapi = openapi()
       app.use(oapi)
-      app.get('/route/*/:param', oapi.path({
+      app.get('/route/*reg/:param', oapi.path({
         summary: 'Test route.',
         responses: {
           200: {
@@ -192,9 +160,9 @@ module.exports = function () {
         .get(`${openapi.defaultRoutePrefix}.json`)
         .expect(200, (err, res) => {
           assert(!err, err)
-          assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{0}/{param}')
+          assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{reg}/{param}')
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters.length, 2)
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[0].name, 0)
+          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[0].name, 'reg')
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[1].name, 'param')
           done()
         })
@@ -205,7 +173,7 @@ module.exports = function () {
 
       const oapi = openapi()
       app.use(oapi)
-      app.get('/route/:paramA/:paramB/desc/*', oapi.path({
+      app.get('/route/:paramA/:paramB/desc/*reg', oapi.path({
         summary: 'Test route.',
         responses: {
           200: {
@@ -224,11 +192,11 @@ module.exports = function () {
         .get(`${openapi.defaultRoutePrefix}.json`)
         .expect(200, (err, res) => {
           assert(!err, err)
-          assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{paramA}/{paramB}/desc/{0}')
+          assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{paramA}/{paramB}/desc/{reg}')
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters.length, 3)
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[0].name, 'paramA')
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[1].name, 'paramB')
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[2].name, 0)
+          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[2].name, 'reg')
           done()
         })
     })
@@ -238,7 +206,7 @@ module.exports = function () {
 
       const oapi = openapi()
       app.use(oapi)
-      app.get('/route/:paramA/:paramB/*', oapi.path({
+      app.get('/route/:paramA/:paramB/*reg', oapi.path({
         summary: 'Test route.',
         responses: {
           200: {
@@ -257,21 +225,21 @@ module.exports = function () {
         .get(`${openapi.defaultRoutePrefix}.json`)
         .expect(200, (err, res) => {
           assert(!err, err)
-          assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{paramA}/{paramB}/{0}')
+          assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{paramA}/{paramB}/{reg}')
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters.length, 3)
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[0].name, 'paramA')
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[1].name, 'paramB')
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[2].name, 0)
+          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[2].name, 'reg')
           done()
         })
     })
 
-    test('serve routes with a parameter and another named, grouped, wildcard parameter', function (done) {
+    test('serve multiple routes which all have a parameter and a wildcard parameter', function (done) {
       const app = express()
 
       const oapi = openapi()
       app.use(oapi)
-      app.get('/route/:paramA/:paramB(*)', oapi.path({
+      app.get(['/route/:paramA/*paramB', '/cars/:paramA/*paramB'], oapi.path({
         summary: 'Test route.',
         responses: {
           200: {
@@ -292,38 +260,6 @@ module.exports = function () {
           assert(!err, err)
           assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{paramA}/{paramB}')
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters.length, 2)
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[0].name, 'paramA')
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[1].name, 'paramB')
-          done()
-        })
-    })
-
-    test('serve multiple routes with a parameter and another named, grouped, wildcard parameter', function (done) {
-      const app = express()
-
-      const oapi = openapi()
-      app.use(oapi)
-      app.get(['/route/:paramA/:paramB(*)', '/cars/:paramA/:paramB(*)'], oapi.path({
-        summary: 'Test route.',
-        responses: {
-          200: {
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'string'
-                }
-              }
-            }
-          }
-        }
-      }))
-
-      supertest(app)
-        .get(`${openapi.defaultRoutePrefix}.json`)
-        .expect(200, (err, res) => {
-          assert(!err, err)
-          assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{paramA}/{paramB}')
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters.length, 4)
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[0].name, 'paramA')
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[1].name, 'paramB')
           done()
@@ -335,7 +271,7 @@ module.exports = function () {
 
       const oapi = openapi()
       app.use(oapi)
-      app.get('/route/:paramA/:paramB*', oapi.path({
+      app.get('/route/:paramA/*paramB', oapi.path({
         summary: 'Test route.',
         responses: {
           200: {
@@ -355,41 +291,9 @@ module.exports = function () {
         .expect(200, (err, res) => {
           assert(!err, err)
           assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{paramA}/{paramB}')
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters.length, 3)
+          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters.length, 2)
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[0].name, 'paramA')
           assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[1].name, 'paramB')
-          done()
-        })
-    })
-
-    test('serve routes with a parameter and a * wildcard', function (done) {
-      const app = express()
-
-      const oapi = openapi()
-      app.use(oapi)
-      app.get('/route/:param/*', oapi.path({
-        summary: 'Test route.',
-        responses: {
-          200: {
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'string'
-                }
-              }
-            }
-          }
-        }
-      }))
-
-      supertest(app)
-        .get(`${openapi.defaultRoutePrefix}.json`)
-        .expect(200, (err, res) => {
-          assert(!err, err)
-          assert.strictEqual(Object.keys((res.body.paths))[0], '/route/{param}/{0}')
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters.length, 2)
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[1].name, 0)
-          assert.strictEqual(res.body.paths[Object.keys((res.body.paths))[0]].get.parameters[0].name, 'param')
           done()
         })
     })
