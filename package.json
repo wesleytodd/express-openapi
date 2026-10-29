@@ -33,7 +33,7 @@
     "ajv-formats": "^2.1.1",
     "ajv-keywords": "^5.1.0",
     "http-errors": "^2.0.0",
-    "router": "github:bjohansebas/router#maproutes",
+    "router": "^2.2.0",
     "serve-static": "^1.15.0",
     "swagger-parser": "^10.0.3",
     "swagger-ui-dist": "^5.11.8",
