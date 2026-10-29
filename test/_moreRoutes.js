@@ -5,7 +5,7 @@ const oapi = openapi()
 router.use(oapi)
 
 router.get(
-  '/',
+  '/:id',
   oapi.validPath({
     summary: 'Get a user.',
     parameters: [
